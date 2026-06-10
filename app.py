@@ -39,7 +39,7 @@ def focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
 # Cache the model so it doesn't reload every time you click something
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("best.model.keras", custom_objects={"focal_loss": focal_loss})
+    return tf.keras.models.load_model("best_model.keras", custom_objects={"focal_loss": focal_loss})
 
 model = load_model()
 
