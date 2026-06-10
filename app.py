@@ -2,8 +2,26 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import requests
+import os
 from tensorflow import keras
 import tensorflow.keras.backend as K
+
+# Put your direct download link here
+MODEL_URL = "https://drive.google.com/file/d/1YU1mlyi3gBLEmga2U7N-adbxxT8xfCAf/view?usp=drive_link"
+MODEL_FILE = "best_model.keras"
+
+@st.cache_resource
+def download_model():
+    if not os.path.exists(MODEL_FILE):
+        st.write("Downloading model... this may take a minute.")
+        response = requests.get(MODEL_URL)
+        with open(MODEL_FILE, "wb") as f:
+            f.write(response.content)
+        st.write("Download complete!")
+
+# Call this at the start of your app
+download_model()
 
 # Define the focal loss here so the model can load it
 @tf.keras.utils.register_keras_serializable()
@@ -21,7 +39,7 @@ def focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
 # Cache the model so it doesn't reload every time you click something
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("model.keras", custom_objects={"focal_loss": focal_loss})
+    return tf.keras.models.load_model("best.model.keras", custom_objects={"focal_loss": focal_loss})
 
 model = load_model()
 
