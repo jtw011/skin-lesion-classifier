@@ -8,7 +8,7 @@ from tensorflow import keras
 import tensorflow.keras.backend as K
 
 # CONFIGURATION
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1YU1mlyi3gBLEmga2U7N-adbxxT8xfCAf"
+MODEL_URL = "https://github.com/jtw011/skin-lesion-classifier/releases/download/binaries/best_model.keras"
 MODEL_PATH = "/tmp/best_model.keras"
 
 # Define the focal loss here so the model can load it
