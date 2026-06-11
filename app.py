@@ -8,7 +8,7 @@ from tensorflow import keras
 import tensorflow.keras.backend as K
 
 # Put your direct download link here
-MODEL_URL = "https://drive.google.com/file/d/1YU1mlyi3gBLEmga2U7N-adbxxT8xfCAf/view?usp=drive_link"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1YU1mlyi3gBLEmga2U7N-adbxxT8xfCAf"
 MODEL_FILE = "best_model.keras"
 
 @st.cache_resource
