@@ -63,7 +63,10 @@ if uploaded_file is not None:
     img = image.resize((224, 224))
     img_array = np.array(img)
     img_array = np.expand_dims(img_array, axis=0)
-    img_array = tf.keras.applications.efficientnet.preprocess_input(img_array)    
+
+    # Force normalization to [0, 1] range manually
+    img_array = img_array.astype('float32') / 255.0
+
     # Add this in app.py before model.predict()
     st.write(f"Image Min: {img_array.min()}, Image Max: {img_array.max()}")
     
