@@ -7,21 +7,9 @@ import os
 from tensorflow import keras
 import tensorflow.keras.backend as K
 
-# Put your direct download link here
+# CONFIGURATION
 MODEL_URL = "https://drive.google.com/uc?export=download&id=1YU1mlyi3gBLEmga2U7N-adbxxT8xfCAf"
-MODEL_FILE = "best_model.keras"
-
-@st.cache_resource
-def download_model():
-    if not os.path.exists(MODEL_FILE):
-        st.write("Downloading model... this may take a minute.")
-        response = requests.get(MODEL_URL)
-        with open(MODEL_FILE, "wb") as f:
-            f.write(response.content)
-        st.write("Download complete!")
-
-# Call this at the start of your app
-download_model()
+MODEL_PATH = "/tmp/best_model.keras"
 
 # Define the focal loss here so the model can load it
 @tf.keras.utils.register_keras_serializable()
@@ -36,16 +24,34 @@ def focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
     loss_0 = -K.mean((1 - alpha) * K.pow(pt_0, gamma) * K.log(1. - pt_0))
     return loss_1 + loss_0
 
-# Cache the model so it doesn't reload every time you click something
 @st.cache_resource
-def load_model():
-    return tf.keras.models.load_model("best_model.keras", custom_objects={"focal_loss": focal_loss})
-
-model = load_model()
+def get_model():
+    # 1. Download
+    if not os.path.exists(MODEL_PATH):
+        st.write("Downloading model from drive...")
+        response = requests.get(MODEL_URL, allow_redirects=True)
+        with open(MODEL_PATH, "wb") as f:
+            f.write(response.content)
+            
+    # 2. Check for success (Google Drive often returns HTML instead of the model)
+    file_size = os.path.getsize(MODEL_PATH)
+    if file_size < 5000000: # Less than 5MB? It's probably an error page.
+        os.remove(MODEL_PATH) # Clear the bad file
+        raise ValueError(f"Download failed! The file is too small ({file_size} bytes). Your Google Drive link is likely not a 'Direct Download' link.")
+    
+    # 3. Load
+    return tf.keras.models.load_model(MODEL_PATH, custom_objects={"focal_loss": focal_loss})
 
 # --- UI ---
 st.title("Skin Lesion Diagnostic Prototype")
-st.warning("⚠️ DISCLAIMER: This tool is for educational purposes only and is NOT a medical device. Consult a dermatologist for medical advice.")
+st.warning("⚠️ DISCLAIMER: This tool is for educational purposes only and is NOT a medical device.")
+
+# Load model (this will trigger the download if needed)
+try:
+    model = get_model()
+except Exception as e:
+    st.error(f"Could not load model: {e}")
+    st.stop()
 
 uploaded_file = st.file_uploader("Upload a dermoscopy image...", type=["jpg", "png"])
 
@@ -62,9 +68,7 @@ if uploaded_file is not None:
     prob = model.predict(img_array)[0][0]
     
     # Display Result
-    # Replace 0.5 with the 'optimal_threshold' you found in your script
     threshold = 0.5 
-    
     if prob >= threshold:
         st.error(f"Prediction: Malignant | Probability: {prob:.2%}")
     else:
