@@ -73,9 +73,19 @@ if uploaded_file is not None:
     # Predict
     prob = model.predict(img_array)[0][0]
     
-    # Display Result
-    threshold = 0.5 
-    if prob >= threshold:
-        st.error(f"Prediction: Malignant | Probability: {prob:.2%}")
+# --- UI Display Result ---
+    
+    # Define your thresholds
+    HIGH_RISK_THRESHOLD = 0.5
+    ELEVATED_RISK_THRESHOLD = 0.168
+    
+    # Logic to interpret probability
+    if prob >= HIGH_RISK_THRESHOLD:
+        st.error(f"Prediction: High Risk | Probability: {prob:.2%}")
+        st.write("Immediate expert review required.")
+    elif prob >= ELEVATED_RISK_THRESHOLD:
+        st.warning(f"Prediction: Elevated Risk | Probability: {prob:.2%}")
+        st.write("Consult a dermatologist for a professional evaluation.")
     else:
-        st.success(f"Prediction: Benign | Probability: {prob:.2%}")
+        st.success(f"Prediction: Low Risk | Probability: {prob:.2%}")
+        st.write("Likely benign, but consult a professional if you have concerns.")
